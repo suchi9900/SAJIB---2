@@ -1,61 +1,75 @@
 const fs = require("fs");
+const path = require("path");
 
 module.exports.config = {
   name: "offline",
   version: "1.0.0",
   hasPermssion: 0,
   credits: "SAJIB",
-  description: "Offline Mode",
+  description: "Owner Offline Mode",
   commandCategory: "system",
-  usages: "",
+  usages: "offline",
   cooldowns: 3
 };
 
 const OWNER_UID = "100049763741416";
-const DATA_FILE = __dirname + "/cache/offline.json";
 
-if (!fs.existsSync(__dirname + "/cache")) {
-  fs.mkdirSync(__dirname + "/cache", { recursive: true });
+const cacheDir = path.join(__dirname, "cache");
+const dataFile = path.join(cacheDir, "offline.json");
+
+if (!fs.existsSync(cacheDir)) {
+  fs.mkdirSync(cacheDir, { recursive: true });
 }
 
-if (!fs.existsSync(DATA_FILE)) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify({ offline: false }));
+if (!fs.existsSync(dataFile)) {
+  fs.writeFileSync(dataFile, JSON.stringify({
+    status: false
+  }));
 }
+
 
 function getData() {
-  return JSON.parse(fs.readFileSync(DATA_FILE));
+  return JSON.parse(fs.readFileSync(dataFile, "utf8"));
 }
 
 function saveData(data) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-}
+  fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
+  }
 module.exports.run = async function ({ api, event }) {
+  if (event.senderID != OWNER_UID) {
+    return api.sendMessage(
+      "❌ শুধুমাত্র বস SAJIB এই কমান্ড ব্যবহার করতে পারবে।",
+      event.threadID,
+      event.messageID
+    );
+  }
+
   const data = getData();
 
-  data.offline = true;
+  data.status = true;
   saveData(data);
 
   return api.sendMessage(
-    "🌙 | বস সজীব অফলাইনে যাবে!\n\n🙂 কেউ অপ্রয়োজনীয় মেসেজ দিবেন না।\n💖 বস ফিরে আসলে আমি সবাইকে জানিয়ে দেব।",
+    "🌙 | বস সজীব অফলাইনে যাচ্ছে!\n🙂 কেউ বিরক্ত করিস না।\n🫶 বস অনলাইনে আসলে আমি জানিয়ে দেব।",
     event.threadID,
     event.messageID
   );
 };
-
 module.exports.handleEvent = async function ({ api, event }) {
   const data = getData();
 
-  if (!data.offline) return;
+  // অফলাইন মোড চালু না থাকলে কিছু করবে না
+  if (!data.status) return;
 
-  if (event.senderID == OWNER_UID) {
-    data.offline = false;
-    saveData(data);
+  // শুধু Owner-এর মেসেজ/ইমোজি দেখবে
+  if (event.senderID != OWNER_UID) return;
 
-    return api.sendMessage(
-      "👑 | সাবধান সবাই! সজীব বস এসে গেছে! 😎\n💖 কি খবর বস? স্বাগতম! ❤️",
-      event.threadID
-    );
-  
-  }
-  
-}
+  // অফলাইন মোড বন্ধ করে দাও
+  data.status = false;
+  saveData(data);
+
+  return api.sendMessage(
+    "👑 | সাবধান সবাই!\n\n🫶 সজীব বস অনলাইনে এসেছে!\n💖 কি খবর বস? Welcome Back ❤️",
+    event.threadID
+  );
+};

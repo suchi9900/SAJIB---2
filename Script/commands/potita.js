@@ -1,26 +1,21 @@
-const axios = require("axios");
+const request = require("request");
 
 module.exports.config = {
   name: "potita",
   version: "1.0.0",
   hasPermssion: 0,
   credits: "Sajib",
-  description: "Send Potita image",
+  description: "Send image",
   commandCategory: "media",
   usages: "potita",
-  cooldowns: 2
+  cooldowns: 5
 };
 
-module.exports.run = async ({ api, event }) => {
-  const img = (await axios.get(
-    "https://i.imgur.com/lMS03rE.jpeg",
-    { responseType: "stream" }
-  )).data;
-
-  api.sendMessage(
+module.exports.run = async function({ api, event }) {
+  return api.sendMessage(
     {
       body: "😈 Potita",
-      attachment: img
+      attachment: request("https://i.imgur.com/lMS03rE.jpeg")
     },
     event.threadID,
     event.messageID

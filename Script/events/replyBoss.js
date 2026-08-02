@@ -15,7 +15,7 @@ module.exports.run = async function ({ api, event }) {
     event.senderID != bossUID
   ) {
     return api.sendMessage(
-      "🫡 কিরে খানকির পোলা, বসের মেসেজ টানিস কেন 🔪..!",
+      "কিরে সজীব বসের মেসেজ টানিস কেন !কথা বলতে চাইলে ইনবক্সে যা 🔪..!",
       event.threadID,
       event.messageID
     );
